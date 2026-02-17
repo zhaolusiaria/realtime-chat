@@ -135,9 +135,18 @@ function setupSocketListeners() {
     socket.emit('answer', currentRoom, answer, fromUser);
   });
   
-  socket.on('answer', async (answer, fromUser) => {
-    await peerConnection.setRemoteDescription(answer);
-  });
+ socket.on('answer', async (answer, fromUser) => {
+  try {
+    if (peerConnection.signalingState === 'have-local-offer') {
+      await peerConnection.setRemoteDescription(answer);
+      console.log('Remote description set successfully');
+    } else {
+      console.log('Ignoring answer, wrong state:', peerConnection.signalingState);
+    }
+  } catch (e) {
+    console.error('Error setting remote description:', e);
+  }
+});
   
   socket.on('ice-candidate', async (candidate, fromUser) => {
     try {
