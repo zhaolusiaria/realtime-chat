@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealTime Chat - Voice & Video</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="logo">
+                <i class="fas fa-comments"></i>
+                <h1>ConnectNow</h1>
+            </div>
+            <div class="input-group">
+                <input type="text" id="username-input" placeholder="Enter your name" maxlength="20">
+                <input type="text" id="room-input" placeholder="Enter room ID" maxlength="20">
+                <button onclick="joinRoom()" class="btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Join Room
+                </button>
+            </div>
+            <p class="hint">Create or join any room to start chatting</p>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="app-screen" class="screen">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="room-info">
+                <i class="fas fa-hashtag"></i>
+                <span id="room-display">Room Name</span>
+                <span class="user-count"><i class="fas fa-users"></i> <span id="user-count">1</span></span>
+            </div>
+            <div class="header-actions">
+                <button onclick="toggleAudio()" id="audio-btn" class="icon-btn" title="Voice Call">
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button onclick="startVideoCall()" id="video-btn" class="icon-btn" title="Video Call">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button onclick="leaveRoom()" class="icon-btn danger" title="Leave">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Video Call Area (Hidden by default) -->
+            <div id="video-container" class="video-container hidden">
+                <div class="video-grid">
+                    <div class="video-wrapper local">
+                        <video id="local-video" autoplay muted playsinline></video>
+                        <span class="video-label">You</span>
+                    </div>
+                    <div class="video-wrapper remote">
+                        <video id="remote-video" autoplay playsinline></video>
+                        <span class="video-label">Remote</span>
+                    </div>
+                </div>
+                <div class="call-controls">
+                    <button onclick="toggleMic()" id="mic-btn" class="control-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button onclick="toggleCamera()" id="camera-btn" class="control-btn">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button onclick="endCall()" class="control-btn danger">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-container">
+                <div id="messages" class="messages">
+                    <div class="system-message">Welcome! Start chatting or make a call.</div>
+                </div>
+                
+                <div class="input-area">
+                    <button onclick="toggleEmoji()" class="icon-btn">
+                        <i class="fas fa-smile"></i>
+                    </button>
+                    <input type="text" id="message-input" placeholder="Type a message..." 
+                           onkeypress="handleKeyPress(event)">
+                    <button onclick="sendMessage()" class="btn-send">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incoming Call Modal -->
+    <div id="incoming-call-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="caller-info">
+                <i class="fas fa-user-circle"></i>
+                <h3 id="caller-name">Someone</h3>
+                <p id="call-type-text">is calling...</p>
+            </div>
+            <div class="call-actions">
+                <button onclick="rejectCall()" class="btn-danger">
+                    <i class="fas fa-phone-slash"></i> Decline
+                </button>
+                <button onclick="acceptCall()" class="btn-success">
+                    <i class="fas fa-phone"></i> Accept
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
