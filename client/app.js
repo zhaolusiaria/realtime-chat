@@ -43,7 +43,9 @@ function joinRoom() {
   currentRoom = room;
   
   // Connect to server
-  socket = io();
+  socket = io({
+  transports: ['websocket', 'polling']
+  });
   
   socket.emit('join-room', room, username);
   
@@ -158,7 +160,7 @@ async function createPeerConnection() {
 }
 
 // Start Voice Call
-async function toggleAudio() {
+async function startVoiceCall() {
   if (isCallActive) return;
   
   try {
