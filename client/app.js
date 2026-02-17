@@ -94,11 +94,25 @@ function setupSocketListeners() {
   
   // Call accepted
   socket.on('call-accepted', async () => {
-    await createPeerConnection();
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-    socket.emit('offer', currentRoom, offer, currentUser);
-  });
+  // Initialize camera first if not already done
+  if (!localStream) {
+    try {
+      const constraints = isVideoEnabled ? 
+        { audio: true, video: true } : 
+        { audio: true, video: false };
+      localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      localVideo.srcObject = localStream;
+    } catch (err) {
+      console.error('Failed to get media:', err);
+      return;
+    }
+  }
+  
+  await createPeerConnection();
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
+  socket.emit('offer', currentRoom, offer, currentUser);
+});
   
   // Call rejected
   socket.on('call-rejected', () => {
@@ -181,21 +195,32 @@ async function startVoiceCall() {
 
 // Start Video Call
 async function startVideoCall() {
-  if (isCallActive) return;
+  if (isCallActive) {
+    console.log("Call already active");
+    return;
+  }
+  
+  console.log("Starting video call...");
   
   try {
+    // Get media first
     localStream = await navigator.mediaDevices.getUserMedia({ 
       audio: true, 
       video: true 
     });
+    
+    console.log("Got local stream:", localStream);
     localVideo.srcObject = localStream;
     isVideoEnabled = true;
     
+    // Then emit
+    console.log("Emitting call-user event");
     socket.emit('call-user', currentRoom, currentUser, 'video');
     addSystemMessage('Video calling...');
+    
   } catch (err) {
     console.error('Error accessing camera:', err);
-    alert('Could not access camera/microphone');
+    alert('Could not access camera/microphone: ' + err.message);
   }
 }
 
@@ -214,7 +239,7 @@ async function acceptCall() {
     socket.emit('accept-call', currentRoom, currentUser);
   } catch (err) {
     console.error('Error accessing media:', err);
-    alert('Could not access microphone/camera');
+    alert('Could not access microphone/camera: ' + err.message);
   }
 }
 
